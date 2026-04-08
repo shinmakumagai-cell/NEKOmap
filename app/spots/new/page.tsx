@@ -5,25 +5,13 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { updateUserScore } from '@/lib/scoring'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
+import dynamic from 'next/dynamic'
+
+const SpotMap = dynamic(() => import('@/components/SpotMapPicker'), { ssr: false })
 
 type FormData = {
   name: string
   description: string
-}
-
-function LocationPicker({ onSelect }: { onSelect: (lat: number, lng: number) => void }) {
-  const [position, setPosition] = useState<[number, number] | null>(null)
-
-  useMapEvents({
-    click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng])
-      onSelect(e.latlng.lat, e.latlng.lng)
-    },
-  })
-
-  return position ? <Marker position={position} /> : null
 }
 
 export default function NewSpotPage() {
@@ -82,13 +70,7 @@ export default function NewSpotPage() {
 
       {/* 地図（場所選択用） */}
       <div className="h-64 flex-shrink-0">
-        <MapContainer center={[35.6762, 139.6503]} zoom={13} className="h-full w-full">
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <LocationPicker onSelect={(lat, lng) => { setLat(lat); setLng(lng) }} />
-        </MapContainer>
+        <SpotMap onSelect={(lat, lng) => { setLat(lat); setLng(lng) }} />
       </div>
 
       {/* フォーム */}
