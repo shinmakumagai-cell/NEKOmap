@@ -4,10 +4,12 @@ import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
 // Webhookはサービスロールキーで直接DBを更新する
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
       const userId = session.metadata?.supabase_user_id
 
       if (userId) {
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('profiles')
           .update({
             is_premium: true,
@@ -44,14 +46,14 @@ export async function POST(req: NextRequest) {
       const subscription = event.data.object as Stripe.Subscription
       const customerId = subscription.customer as string
 
-      const { data: profile } = await supabaseAdmin
+      const { data: profile } = await getSupabaseAdmin()
         .from('profiles')
         .select('id')
         .eq('stripe_customer_id', customerId)
         .single()
 
       if (profile) {
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('profiles')
           .update({ is_premium: false })
           .eq('id', profile.id)
