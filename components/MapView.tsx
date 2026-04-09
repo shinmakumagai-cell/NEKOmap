@@ -79,59 +79,23 @@ function getSpotIcon(spot: Spot): L.DivIcon {
   return defaultCatIcon
 }
 
-// 現在地ボタン＆マーカー
-function LocationControl() {
+// 現在地に自動移動するコンポーネント
+function AutoLocate({ onLocated }: { onLocated: (pos: [number, number]) => void }) {
   const map = useMap()
-  const [position, setPosition] = useState<[number, number] | null>(null)
-
-  function handleLocate() {
-    map.locate({ setView: true, maxZoom: 16 })
-  }
 
   useEffect(() => {
+    map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true })
+
     function onLocationFound(e: L.LocationEvent) {
-      setPosition([e.latlng.lat, e.latlng.lng])
+      onLocated([e.latlng.lat, e.latlng.lng])
     }
     map.on('locationfound', onLocationFound)
     return () => {
       map.off('locationfound', onLocationFound)
     }
-  }, [map])
+  }, [map, onLocated])
 
-  return (
-    <>
-      <div className="leaflet-top leaflet-right" style={{ marginTop: 10, marginRight: 10 }}>
-        <div className="leaflet-control">
-          <button
-            onClick={handleLocate}
-            className="bg-white rounded-lg shadow-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
-          >
-            📍 現在地
-          </button>
-        </div>
-      </div>
-      {position && (
-        <>
-          <Circle
-            center={position}
-            radius={100}
-            pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.15, weight: 2 }}
-          />
-          <Marker
-            position={position}
-            icon={new L.DivIcon({
-              className: '',
-              html: '<div style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
-              iconSize: [16, 16],
-              iconAnchor: [8, 8],
-            })}
-          >
-            <Popup>現在地</Popup>
-          </Marker>
-        </>
-      )}
-    </>
-  )
+  return null
 }
 
 type Props = {
@@ -140,16 +104,57 @@ type Props = {
 
 export default function MapView({ spots }: Props) {
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null)
-  const [isClient, setIsClient] = useState(false)
+  const [locationStatus, setLocationStatus] = useState<'loading' | 'granted' | 'denied'>('loading')
+  const [currentPos, setCurrentPos] = useState<[number, number] | null>(null)
 
   useEffect(() => {
-    setIsClient(true)
+    if (!navigator.geolocation) {
+      setLocationStatus('denied')
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCurrentPos([pos.coords.latitude, pos.coords.longitude])
+        setLocationStatus('granted')
+      },
+      () => {
+        setLocationStatus('denied')
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }, [])
 
-  if (!isClient) {
+  // 位置情報の許可待ち
+  if (locationStatus === 'loading') {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-100">
-        <p className="text-gray-500">地図を読み込み中...</p>
+      <div className="h-full flex flex-col items-center justify-center bg-amber-50 px-6">
+        <p className="text-4xl mb-4">🐱</p>
+        <p className="text-lg font-bold text-gray-800 mb-2">現在地を取得中...</p>
+        <p className="text-sm text-gray-500 text-center">
+          位置情報の許可をお願いします
+        </p>
+        <div className="mt-4 w-8 h-8 border-4 border-amber-300 border-t-amber-600 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  // 位置情報を拒否した場合
+  if (locationStatus === 'denied') {
+    return (
+      <div className="h-full flex flex-col items-center justify-center bg-gray-50 px-6">
+        <p className="text-4xl mb-4">📍</p>
+        <p className="text-lg font-bold text-gray-800 mb-2">位置情報が必要です</p>
+        <p className="text-sm text-gray-500 text-center mb-6">
+          猫マップは現在地をもとに近くの猫スポットを表示します。<br />
+          ブラウザの設定から位置情報を許可してください。
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-gray-800 text-white px-6 py-3 rounded-full font-medium text-sm active:bg-gray-900"
+        >
+          再読み込みして許可する
+        </button>
       </div>
     )
   }
@@ -157,8 +162,8 @@ export default function MapView({ spots }: Props) {
   return (
     <>
       <MapContainer
-        center={[35.6762, 139.6503]}
-        zoom={13}
+        center={currentPos ?? [35.6762, 139.6503]}
+        zoom={16}
         className="h-full w-full"
       >
         <TileLayer
@@ -166,7 +171,34 @@ export default function MapView({ spots }: Props) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <LocationControl />
+        <AutoLocate onLocated={setCurrentPos} />
+
+        {/* 現在地マーカー */}
+        {currentPos && (
+          <>
+            <Circle
+              center={currentPos}
+              radius={100}
+              pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.1, weight: 2 }}
+            />
+            <Marker
+              position={currentPos}
+              icon={new L.DivIcon({
+                className: '',
+                html: '<div style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+              })}
+            >
+              <Popup>現在地</Popup>
+            </Marker>
+          </>
+        )}
+
+        {/* 現在地に戻るボタン */}
+        {currentPos && (
+          <RecenterButton position={currentPos} />
+        )}
 
         {spots.map((spot) => (
           <Marker
@@ -196,5 +228,22 @@ export default function MapView({ spots }: Props) {
         />
       )}
     </>
+  )
+}
+
+function RecenterButton({ position }: { position: [number, number] }) {
+  const map = useMap()
+
+  return (
+    <div className="leaflet-bottom leaflet-right" style={{ marginBottom: 80, marginRight: 10 }}>
+      <div className="leaflet-control">
+        <button
+          onClick={() => map.setView(position, 16)}
+          className="bg-white rounded-full shadow-lg w-11 h-11 flex items-center justify-center text-lg border border-gray-200 active:bg-gray-100"
+        >
+          📍
+        </button>
+      </div>
+    </div>
   )
 }

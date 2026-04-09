@@ -18,7 +18,8 @@ export default function CommentForm({ spotId, onCommentAdded }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>()
+  const { register, handleSubmit, reset, watch } = useForm<FormData>()
+  const body = watch('body', '')
 
   async function onSubmit(data: FormData) {
     setSubmitting(true)
@@ -53,23 +54,30 @@ export default function CommentForm({ spotId, onCommentAdded }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
-      <input
-        {...register('body', { required: 'コメントを入力してください', maxLength: 200 })}
-        placeholder="猫の様子をコメント..."
-        className="flex-1 text-sm border border-gray-200 rounded-full px-3 py-2 focus:outline-none focus:border-gray-400"
-        disabled={submitting}
-      />
-      <button
-        type="submit"
-        disabled={submitting}
-        className="text-sm bg-gray-800 text-white px-4 py-2 rounded-full hover:bg-gray-700 disabled:opacity-50"
-      >
-        {submitting ? '...' : '送信'}
-      </button>
+    <div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex items-center gap-2">
+        <div className="flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm">
+            😺
+          </div>
+        </div>
+        <input
+          {...register('body', { required: true, maxLength: 200 })}
+          placeholder="返信をポスト"
+          className="flex-1 text-[15px] bg-transparent py-2 focus:outline-none placeholder-gray-400"
+          disabled={submitting}
+        />
+        <button
+          type="submit"
+          disabled={submitting || !body?.trim()}
+          className="text-sm bg-gray-800 text-white px-4 py-1.5 rounded-full font-bold hover:bg-gray-700 disabled:opacity-40 active:bg-gray-900"
+        >
+          {submitting ? '...' : '返信'}
+        </button>
+      </form>
       {error && (
-        <p className="text-xs text-red-500 mt-1">{error}</p>
+        <p className="text-xs text-red-500 mt-1 ml-10">{error}</p>
       )}
-    </form>
+    </div>
   )
 }
