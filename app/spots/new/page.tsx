@@ -69,55 +69,45 @@ export default function NewSpotPage() {
       </div>
 
       {/* 地図（場所選択用） */}
-      <div className="h-64 flex-shrink-0">
+      <div className="flex-1 min-h-[200px]">
         <SpotMap onSelect={(lat, lng) => { setLat(lat); setLng(lng) }} />
       </div>
 
-      {/* フォーム */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* フォーム（下部固定） */}
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3 pb-safe">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              スポット名 <span className="text-red-500">*</span>
-            </label>
             <input
               {...register('name', { required: 'スポット名を入力してください' })}
-              placeholder="例：〇〇公園の三毛猫エリア"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-400"
+              placeholder="スポット名（例：〇〇公園の三毛猫エリア）"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-gray-400"
             />
             {errors.name && (
               <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              説明（任意）
-            </label>
-            <textarea
-              {...register('description')}
-              placeholder="猫がいる時間帯や特徴など..."
-              rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-400 resize-none"
-            />
-          </div>
+          <textarea
+            {...register('description')}
+            placeholder="説明（猫がいる時間帯や特徴など...）"
+            rows={2}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-gray-400 resize-none"
+          />
 
           {lat && lng && (
             <p className="text-xs text-green-600">
-              場所を選択しました（{lat.toFixed(4)}, {lng.toFixed(4)}）
+              📍 場所を選択済み（{lat.toFixed(4)}, {lng.toFixed(4)}）
             </p>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
+            <p className="text-sm text-red-500">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gray-800 text-white py-3 rounded-full font-medium hover:bg-gray-700 disabled:opacity-50"
+            className="w-full bg-gray-800 text-white py-3.5 rounded-full font-medium text-base hover:bg-gray-700 disabled:opacity-50 active:bg-gray-900"
           >
             {submitting ? '登録中...' : 'スポットを登録する'}
           </button>
