@@ -6,7 +6,6 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Spot } from '@/types'
 import SpotModal from './SpotModal'
-import { createMarkerIcon } from '@/lib/markers'
 
 // Leaflet のデフォルトアイコン修正（Next.js環境用）
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -16,23 +15,68 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
-// PRスポット用の金色アイコン
-const sponsoredIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+function createPhotoIcon(photoUrl: string): L.DivIcon {
+  return new L.DivIcon({
+    className: '',
+    html: `<div style="
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      overflow: hidden;
+      background: #f3f4f6;
+    ">
+      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" />
+    </div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -24],
+  })
+}
+
+const defaultCatIcon = new L.DivIcon({
+  className: '',
+  html: `<div style="
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    background: #FEF3C7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  ">🐱</div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -22],
 })
 
-function getSpotIcon(spot: Spot): L.Icon | L.DivIcon {
+const sponsoredIcon = new L.DivIcon({
+  className: '',
+  html: `<div style="
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid #F59E0B;
+    box-shadow: 0 2px 12px rgba(245,158,11,0.5);
+    background: #FEF3C7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  ">⭐</div>`,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -26],
+})
+
+function getSpotIcon(spot: Spot): L.DivIcon {
   if (spot.is_sponsored) return sponsoredIcon
-  const markerType = spot.profiles?.marker_type
-  if (markerType && markerType !== 'default') {
-    return createMarkerIcon(markerType, spot.profiles?.marker_photo_url)
-  }
-  return new L.Icon.Default()
+  if (spot.photo_url) return createPhotoIcon(spot.photo_url)
+  return defaultCatIcon
 }
 
 // 現在地ボタン＆マーカー

@@ -17,6 +17,7 @@ export type Spot = {
   user_id: string
   name: string
   description: string | null
+  photo_url: string | null
   lat: number
   lng: number
   is_sponsored: boolean

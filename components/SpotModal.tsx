@@ -33,6 +33,23 @@ export default function SpotModal({ spot, onClose }: Props) {
   return (
     <div className="absolute inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl">
+        {/* スポット写真 */}
+        {spot.photo_url && (
+          <div className="relative">
+            <img
+              src={spot.photo_url}
+              alt={spot.name}
+              className="w-full h-48 object-cover rounded-t-2xl"
+            />
+            <button
+              onClick={onClose}
+              className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center text-lg"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* ヘッダー */}
         <div className="flex items-start justify-between p-4 border-b">
           <div>
@@ -48,12 +65,14 @@ export default function SpotModal({ spot, onClose }: Props) {
               <p className="text-sm text-gray-500 mt-1">{spot.description}</p>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none ml-2"
-          >
-            ×
-          </button>
+          {!spot.photo_url && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none ml-2"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         {/* 猫一覧（プレミアム登録ありの場合） */}

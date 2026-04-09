@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -20,8 +20,21 @@ export default function NewSpotPage() {
   const [lng, setLng] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setPhoto(file)
+      const reader = new FileReader()
+      reader.onload = () => setPhotoPreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
 
   async function onSubmit(data: FormData) {
     if (!lat || !lng) {
@@ -41,12 +54,31 @@ export default function NewSpotPage() {
       return
     }
 
+    let photoUrl: string | null = null
+
+    // 写真をSupabase Storageにアップロード
+    if (photo) {
+      const ext = photo.name.split('.').pop()
+      const fileName = `${user.id}/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('spot-photos')
+        .upload(fileName, photo)
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from('spot-photos')
+          .getPublicUrl(fileName)
+        photoUrl = urlData.publicUrl
+      }
+    }
+
     const { error: insertError } = await supabase
       .from('spots')
       .insert({
         user_id: user.id,
         name: data.name,
         description: data.description,
+        photo_url: photoUrl,
         lat,
         lng,
       })
@@ -76,15 +108,43 @@ export default function NewSpotPage() {
       {/* フォーム（下部固定） */}
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3 pb-safe">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div>
+          {/* 写真アップロード */}
+          <div className="flex items-center gap-3">
             <input
-              {...register('name', { required: 'スポット名を入力してください' })}
-              placeholder="スポット名（例：〇〇公園の三毛猫エリア）"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-gray-400"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              ref={fileInputRef}
+              onChange={handlePhotoChange}
+              className="hidden"
             />
-            {errors.name && (
-              <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+            {photoPreview ? (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 rounded-xl overflow-hidden border-2 border-amber-300 flex-shrink-0"
+              >
+                <img src={photoPreview} alt="" className="w-full h-full object-cover" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-2xl flex-shrink-0 hover:border-gray-400 active:bg-gray-50"
+              >
+                📷
+              </button>
             )}
+            <div className="flex-1">
+              <input
+                {...register('name', { required: 'スポット名を入力してください' })}
+                placeholder="スポット名"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-gray-400"
+              />
+              {errors.name && (
+                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              )}
+            </div>
           </div>
 
           <textarea
