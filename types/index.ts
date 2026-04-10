@@ -42,6 +42,7 @@ export type Comment = {
   spot_id: string
   user_id: string
   body: string
+  photo_url: string | null
   created_at: string
   profiles?: Profile
 }

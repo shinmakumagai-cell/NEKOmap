@@ -173,6 +173,15 @@ export default function SpotModal({ spot, onClose }: Props) {
                       <span className="text-xs text-gray-400">{timeAgo(comment.created_at)}</span>
                     </div>
                     <p className="text-[15px] text-gray-800 leading-relaxed">{comment.body}</p>
+                    {comment.photo_url && (
+                      <div className="mt-2 rounded-xl overflow-hidden border border-gray-200 inline-block">
+                        <img
+                          src={comment.photo_url}
+                          alt=""
+                          className="max-h-48 object-cover"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
