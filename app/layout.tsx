@@ -16,6 +16,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: '猫マップ — 近所の猫スポットを共有しよう',
   description: '近所で会える猫のスポットをみんなで共有するマップアプリ',
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
