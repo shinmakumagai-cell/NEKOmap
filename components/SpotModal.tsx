@@ -33,14 +33,30 @@ export default function SpotModal({ spot, onClose }: Props) {
 
   async function fetchComments() {
     const supabase = createClient()
+
+    // 最新20件を取得
     const { data } = await supabase
       .from('comments')
       .select('*, profiles(username, is_premium)')
       .eq('spot_id', spot.id)
       .order('created_at', { ascending: false })
+      .limit(20)
 
     setComments((data as Comment[]) ?? [])
     setLoading(false)
+
+    // 20件を超える古いコメントを削除
+    const { data: allComments } = await supabase
+      .from('comments')
+      .select('id')
+      .eq('spot_id', spot.id)
+      .order('created_at', { ascending: false })
+      .range(20, 1000)
+
+    if (allComments && allComments.length > 0) {
+      const oldIds = allComments.map((c) => c.id)
+      await supabase.from('comments').delete().in('id', oldIds)
+    }
   }
 
   return (

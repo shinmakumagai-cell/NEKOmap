@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import MarkerSettings from '@/components/MarkerSettings'
+import UsernameEdit from '@/components/UsernameEdit'
 import { MarkerType } from '@/types'
 
 export default async function SettingsPage() {
@@ -17,6 +18,7 @@ export default async function SettingsPage() {
 
   const isPremium = profile?.is_premium ?? false
   const markerType = (profile?.marker_type ?? 'default') as MarkerType
+  const username = profile?.username ?? user.email ?? ''
 
   return (
     <div className="max-w-sm mx-auto px-4 py-8">
@@ -24,8 +26,7 @@ export default async function SettingsPage() {
 
       <div className="space-y-6">
         <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-sm text-gray-500 mb-1">ユーザー名</p>
-          <p className="text-gray-800 font-medium">{profile?.username ?? user.email}</p>
+          <UsernameEdit currentUsername={username} />
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
