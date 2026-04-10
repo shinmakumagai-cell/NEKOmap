@@ -67,7 +67,7 @@ export default async function PremiumPage() {
             {/* 価格 */}
             <div className="text-center mb-6">
               <p className="text-gray-400 text-sm">月額</p>
-              <p className="text-4xl font-bold text-gray-800">¥500</p>
+              <p className="text-4xl font-bold text-gray-800">¥300</p>
               <p className="text-gray-400 text-sm mt-1">いつでもキャンセル可能</p>
             </div>
 

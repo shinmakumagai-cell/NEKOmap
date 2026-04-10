@@ -16,20 +16,38 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
+// URLをサニタイズ（XSS対策）
+function sanitizeUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      return parsed.href
+    }
+  } catch {}
+  return ''
+}
+
 function createPhotoIcon(photoUrl: string): L.DivIcon {
+  const safeUrl = sanitizeUrl(photoUrl)
   return new L.DivIcon({
     className: '',
-    html: `<div style="
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      overflow: hidden;
-      background: #f3f4f6;
-    ">
-      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" />
-    </div>`,
+    html: safeUrl
+      ? `<div style="
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          overflow: hidden;
+          background: #f3f4f6;
+        ">
+          <img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;" />
+        </div>`
+      : `<div style="
+          width: 40px;height: 40px;border-radius: 50%;border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);background: #FEF3C7;
+          display:flex;align-items:center;justify-content:center;font-size:20px;
+        ">🐱</div>`,
     iconSize: [44, 44],
     iconAnchor: [22, 22],
     popupAnchor: [0, -24],

@@ -26,14 +26,27 @@ export default function NewSpotPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>()
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      setPhoto(file)
-      const reader = new FileReader()
-      reader.onload = () => setPhotoPreview(reader.result as string)
-      reader.readAsDataURL(file)
+    if (!file) return
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('画像はJPEG、PNG、WebP形式のみ対応しています')
+      return
     }
+    if (file.size > MAX_FILE_SIZE) {
+      setError('画像は5MB以下にしてください')
+      return
+    }
+
+    setError(null)
+    setPhoto(file)
+    const reader = new FileReader()
+    reader.onload = () => setPhotoPreview(reader.result as string)
+    reader.readAsDataURL(file)
   }
 
   async function onSubmit(data: FormData) {
