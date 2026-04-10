@@ -10,6 +10,7 @@ type Props = {
     username: string | null
     isPremium: boolean
     title: string | null
+    isAdmin?: boolean
   } | null
 }
 
@@ -89,6 +90,11 @@ export default function HeaderClient({ user }: Props) {
                   {!user.isPremium && (
                     <a href="/premium" onClick={() => setMenuOpen(false)} className="block px-3 py-2.5 text-sm text-amber-600 font-medium hover:bg-amber-50 rounded-lg active:bg-amber-100">
                       ✨ プレミアム
+                    </a>
+                  )}
+                  {user.isAdmin && (
+                    <a href="/admin" onClick={() => setMenuOpen(false)} className="block px-3 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 rounded-lg active:bg-red-100">
+                      🔒 管理者
                     </a>
                   )}
                   <button

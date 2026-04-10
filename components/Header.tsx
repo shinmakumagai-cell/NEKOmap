@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import HeaderClient from './HeaderClient'
 
+const ADMIN_EMAIL = 'shinmakumagai@gmail.com'
+
 export default async function Header() {
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -8,6 +10,7 @@ export default async function Header() {
   let isPremium = false
   let username = null
   let title = null
+  const isAdmin = user?.email === ADMIN_EMAIL
 
   if (user) {
     const { data: profile } = await supabase
@@ -22,7 +25,7 @@ export default async function Header() {
 
   return (
     <HeaderClient
-      user={user ? { email: user.email ?? '', username, isPremium, title } : null}
+      user={user ? { email: user.email ?? '', username, isPremium, title, isAdmin } : null}
     />
   )
 }

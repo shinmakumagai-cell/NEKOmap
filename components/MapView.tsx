@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Spot } from '@/types'
@@ -77,6 +78,30 @@ function getSpotIcon(spot: Spot): L.DivIcon {
   if (spot.is_sponsored) return sponsoredIcon
   if (spot.photo_url) return createPhotoIcon(spot.photo_url)
   return defaultCatIcon
+}
+
+// クラスターアイコンを作成
+function createClusterIcon(cluster: any): L.DivIcon {
+  const count = cluster.getChildCount()
+  return new L.DivIcon({
+    className: '',
+    html: `<div style="
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 3px solid white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    ">🐱${count}</div>`,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+  })
 }
 
 // 現在地に自動移動するコンポーネント
@@ -200,25 +225,35 @@ export default function MapView({ spots }: Props) {
           <RecenterButton position={currentPos} />
         )}
 
-        {spots.map((spot) => (
-          <Marker
-            key={spot.id}
-            position={[spot.lat, spot.lng]}
-            icon={getSpotIcon(spot)}
-            eventHandlers={{
-              click: () => setSelectedSpot(spot),
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-bold">{spot.name}</p>
-                {spot.is_sponsored && (
-                  <span className="text-amber-600 text-xs">PRスポット</span>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {/* 猫スポット（クラスタリング） */}
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={createClusterIcon}
+          maxClusterRadius={60}
+          spiderfyOnMaxZoom
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick
+        >
+          {spots.map((spot) => (
+            <Marker
+              key={spot.id}
+              position={[spot.lat, spot.lng]}
+              icon={getSpotIcon(spot)}
+              eventHandlers={{
+                click: () => setSelectedSpot(spot),
+              }}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <p className="font-bold">{spot.name}</p>
+                  {spot.is_sponsored && (
+                    <span className="text-amber-600 text-xs">PRスポット</span>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
 
       {selectedSpot && (
