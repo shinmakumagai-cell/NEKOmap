@@ -30,9 +30,19 @@ export default function SpotModal({ spot, onClose, isPremium, isAdmin, onSpotDel
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState(spot.name)
+  const [editDescription, setEditDescription] = useState(spot.description ?? '')
+  const [saving, setSaving] = useState(false)
+  const [displayName, setDisplayName] = useState(spot.name)
+  const [displayDescription, setDisplayDescription] = useState(spot.description)
 
   useEffect(() => {
     fetchComments()
+    createClient().auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id ?? null)
+    })
   }, [spot.id])
 
   async function fetchComments() {
@@ -94,6 +104,27 @@ export default function SpotModal({ spot, onClose, isPremium, isAdmin, onSpotDel
       alert('削除に失敗しました')
     }
     setDeleting(null)
+  }
+
+  const isOwner = currentUserId === spot.user_id
+
+  async function handleSaveEdit() {
+    if (!editName.trim()) return
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('spots')
+      .update({ name: editName.trim(), description: editDescription.trim() || null })
+      .eq('id', spot.id)
+      .eq('user_id', currentUserId!)
+    if (!error) {
+      setDisplayName(editName.trim())
+      setDisplayDescription(editDescription.trim() || null)
+      setEditing(false)
+    } else {
+      alert('更新に失敗しました')
+    }
+    setSaving(false)
   }
 
   const bg = isPremium ? 'bg-gray-900' : 'bg-white'
@@ -172,9 +203,65 @@ export default function SpotModal({ spot, onClose, isPremium, isAdmin, onSpotDel
                 </div>
 
                 {/* スポット名 + 説明 */}
-                <p className={`text-[15px] font-medium leading-snug ${textPrimary}`}>{spot.name}</p>
-                {spot.description && (
-                  <p className={`text-[15px] mt-1 leading-relaxed ${isPremium ? 'text-gray-300' : 'text-gray-700'}`}>{spot.description}</p>
+                {editing ? (
+                  <div className="space-y-2 mt-1">
+                    <input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className={`w-full text-[15px] font-medium rounded-lg px-3 py-2 border outline-none ${
+                        isPremium
+                          ? 'bg-gray-800 border-gray-700 text-white focus:border-amber-500'
+                          : 'bg-white border-gray-200 text-gray-900 focus:border-gray-400'
+                      }`}
+                      placeholder="スポット名"
+                      maxLength={50}
+                    />
+                    <textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      rows={2}
+                      className={`w-full text-[15px] rounded-lg px-3 py-2 border outline-none resize-none ${
+                        isPremium
+                          ? 'bg-gray-800 border-gray-700 text-white focus:border-amber-500'
+                          : 'bg-white border-gray-200 text-gray-900 focus:border-gray-400'
+                      }`}
+                      placeholder="説明（任意）"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveEdit}
+                        disabled={saving || !editName.trim()}
+                        className="text-xs px-3 py-1.5 rounded-full font-medium bg-amber-500 text-white disabled:opacity-50"
+                      >
+                        {saving ? '保存中...' : '保存'}
+                      </button>
+                      <button
+                        onClick={() => { setEditing(false); setEditName(displayName); setEditDescription(displayDescription ?? '') }}
+                        className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+                          isPremium ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        キャンセル
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <p className={`text-[15px] font-medium leading-snug ${textPrimary}`}>{displayName}</p>
+                      {(isOwner || isAdmin) && (
+                        <button
+                          onClick={() => setEditing(true)}
+                          className={`text-xs ${isPremium ? 'text-amber-400 hover:text-amber-300' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                          編集
+                        </button>
+                      )}
+                    </div>
+                    {displayDescription && (
+                      <p className={`text-[15px] mt-1 leading-relaxed ${isPremium ? 'text-gray-300' : 'text-gray-700'}`}>{displayDescription}</p>
+                    )}
+                  </>
                 )}
 
                 {/* スポット写真 */}
