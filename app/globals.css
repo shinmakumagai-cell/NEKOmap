@@ -36,10 +36,15 @@ html, body {
   filter: drop-shadow(0 0 6px #f59e0b);
 }
 
-/* カスタム猫写真マーカー */
-.custom-cat-marker {
-  background: transparent;
-  border: none;
+/* カスタム猫マーカー（Leafletデフォルトスタイルを無効化） */
+.photo-marker,
+.cat-marker,
+.sponsored-pin,
+.custom-cat-marker,
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* モバイルでの入力フィールドのズーム防止 */

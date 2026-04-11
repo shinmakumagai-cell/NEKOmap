@@ -31,17 +31,12 @@ function createPhotoIcon(photoUrl: string): L.DivIcon {
   const safeUrl = sanitizeUrl(photoUrl)
   if (!safeUrl) return defaultCatIcon
   return new L.DivIcon({
-    className: '',
+    className: 'photo-marker',
     html: `<div style="
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-        overflow: hidden;
-        background: #f3f4f6;
+        width:52px;height:52px;border-radius:50%;border:3px solid white;
+        box-shadow:0 2px 10px rgba(0,0,0,0.35);overflow:hidden;background:#f3f4f6;
       ">
-        <img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;" />
+        <img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />
       </div>`,
     iconSize: [52, 52],
     iconAnchor: [26, 26],
@@ -50,7 +45,7 @@ function createPhotoIcon(photoUrl: string): L.DivIcon {
 }
 
 const defaultCatIcon = new L.DivIcon({
-  className: '',
+  className: 'cat-marker',
   html: `<div style="
     width: 44px;
     height: 44px;
@@ -69,7 +64,7 @@ const defaultCatIcon = new L.DivIcon({
 })
 
 const sponsoredIcon = new L.DivIcon({
-  className: '',
+  className: 'sponsored-pin',
   html: `<div style="
     width: 48px;
     height: 48px;
@@ -97,7 +92,7 @@ function getSpotIcon(spot: Spot): L.DivIcon {
 function createClusterIcon(cluster: any): L.DivIcon {
   const count = cluster.getChildCount()
   return new L.DivIcon({
-    className: '',
+    className: 'cat-marker',
     html: `<div style="
       width: 48px;
       height: 48px;
@@ -224,7 +219,7 @@ export default function MapView({ spots, isPremium, isAdmin }: Props) {
             <Marker
               position={currentPos}
               icon={new L.DivIcon({
-                className: '',
+                className: 'cat-marker',
                 html: '<div style="width:16px;height:16px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
                 iconSize: [16, 16],
                 iconAnchor: [8, 8],
