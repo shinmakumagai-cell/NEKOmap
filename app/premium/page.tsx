@@ -1,7 +1,12 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getTitleForSpots } from '@/lib/scoring'
+import CancelButton from '@/components/CancelButton'
 
-export default async function PremiumPage() {
+export default async function PremiumPage({
+  searchParams,
+}: {
+  searchParams: { success?: string; canceled?: string; cancel_scheduled?: string }
+}) {
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -94,6 +99,13 @@ export default async function PremiumPage() {
               />
             </div>
 
+            {/* ステータスメッセージ */}
+            {searchParams.cancel_scheduled && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-center">
+                <p className="text-sm text-amber-700">解約が予約されました。現在の期間終了まで引き続きご利用いただけます。</p>
+              </div>
+            )}
+
             {/* 機能リンク */}
             <div className="space-y-2">
               <a href="/calendar" className="block bg-white border border-gray-100 rounded-xl p-4 hover:bg-gray-50 active:bg-gray-100">
@@ -105,6 +117,11 @@ export default async function PremiumPage() {
               <a href="/leaderboard" className="block bg-white border border-gray-100 rounded-xl p-4 hover:bg-gray-50 active:bg-gray-100">
                 <span className="text-sm font-medium text-gray-800">👑 ランキング</span>
               </a>
+            </div>
+
+            {/* 解約ボタン */}
+            <div className="mt-8">
+              <CancelButton />
             </div>
           </>
         ) : (
