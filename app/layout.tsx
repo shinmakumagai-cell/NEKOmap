@@ -38,6 +38,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
+      <head>
+        {/* Google AdSense: 承認後に ca-pub-XXXXXXXXXXXXXXXX を自分のIDに変更 */}
+        {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous" /> */}
+      </head>
       <body className={inter.className}>
         <Header />
         <main className="pt-14 h-[100dvh]">
