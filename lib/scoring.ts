@@ -15,8 +15,8 @@ export function getTitleForSpots(spotsCount: number) {
   return [...TITLES].reverse().find((t) => spotsCount >= t.minSpots) ?? TITLES[0]
 }
 
-export function calculateScore(spotsCount: number, catsCount: number, commentsCount: number) {
-  return spotsCount * 5 + catsCount * 3 + commentsCount * 1
+export function calculateScore(spotsCount: number, _catsCount: number, _commentsCount: number) {
+  return spotsCount * 1
 }
 
 export async function updateUserScore(userId: string) {
