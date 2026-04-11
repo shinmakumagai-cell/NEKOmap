@@ -29,36 +29,31 @@ function sanitizeUrl(url: string): string {
 
 function createPhotoIcon(photoUrl: string): L.DivIcon {
   const safeUrl = sanitizeUrl(photoUrl)
+  if (!safeUrl) return defaultCatIcon
   return new L.DivIcon({
     className: '',
-    html: safeUrl
-      ? `<div style="
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          overflow: hidden;
-          background: #f3f4f6;
-        ">
-          <img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;" />
-        </div>`
-      : `<div style="
-          width: 40px;height: 40px;border-radius: 50%;border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);background: #FEF3C7;
-          display:flex;align-items:center;justify-content:center;font-size:20px;
-        ">🐱</div>`,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-    popupAnchor: [0, -24],
+    html: `<div style="
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+        overflow: hidden;
+        background: #f3f4f6;
+      ">
+        <img src="${safeUrl}" style="width:100%;height:100%;object-fit:cover;" />
+      </div>`,
+    iconSize: [52, 52],
+    iconAnchor: [26, 26],
+    popupAnchor: [0, -28],
   })
 }
 
 const defaultCatIcon = new L.DivIcon({
   className: '',
   html: `<div style="
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 3px solid white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -66,11 +61,11 @@ const defaultCatIcon = new L.DivIcon({
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 22px;
   ">🐱</div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-  popupAnchor: [0, -22],
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
+  popupAnchor: [0, -24],
 })
 
 const sponsoredIcon = new L.DivIcon({

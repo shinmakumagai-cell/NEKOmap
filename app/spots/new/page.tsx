@@ -50,6 +50,10 @@ export default function NewSpotPage() {
   }
 
   async function onSubmit(data: FormData) {
+    if (!photo) {
+      setError('猫の写真を追加してください')
+      return
+    }
     if (!lat || !lng) {
       setError('地図をタップしてスポットの場所を選んでください')
       return
@@ -142,9 +146,10 @@ export default function NewSpotPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center text-2xl flex-shrink-0 hover:border-gray-400 active:bg-gray-50"
+                className="w-16 h-16 rounded-xl border-2 border-dashed border-amber-400 flex flex-col items-center justify-center flex-shrink-0 hover:border-amber-500 active:bg-amber-50 bg-amber-50/50"
               >
-                📷
+                <span className="text-2xl">📷</span>
+                <span className="text-[10px] text-amber-600 font-medium">必須</span>
               </button>
             )}
             <div className="flex-1">
