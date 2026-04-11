@@ -13,8 +13,10 @@ export default async function HomePage() {
     .select('*, profiles(username, is_premium, marker_type, marker_photo_url), cats(*), comments(count)')
     .order('created_at', { ascending: false })
 
+  const ADMIN_EMAIL = 'shinmakumagai@gmail.com'
   const { data: { user } } = await supabase.auth.getUser()
   let isPremium = false
+  const isAdmin = user?.email === ADMIN_EMAIL
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -26,7 +28,7 @@ export default async function HomePage() {
 
   return (
     <div className="h-full">
-      <MapView spots={(spots as Spot[]) ?? []} isPremium={isPremium} />
+      <MapView spots={(spots as Spot[]) ?? []} isPremium={isPremium} isAdmin={isAdmin} />
       <AdBanner isPremium={isPremium} />
     </div>
   )

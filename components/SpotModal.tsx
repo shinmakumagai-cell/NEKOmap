@@ -10,6 +10,8 @@ type Props = {
   spot: Spot
   onClose: () => void
   isPremium?: boolean
+  isAdmin?: boolean
+  onSpotDeleted?: () => void
 }
 
 function timeAgo(dateStr: string): string {
@@ -24,9 +26,10 @@ function timeAgo(dateStr: string): string {
   return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
 }
 
-export default function SpotModal({ spot, onClose, isPremium }: Props) {
+export default function SpotModal({ spot, onClose, isPremium, isAdmin, onSpotDeleted }: Props) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   useEffect(() => {
     fetchComments()
@@ -60,6 +63,39 @@ export default function SpotModal({ spot, onClose, isPremium }: Props) {
     }
   }
 
+  async function handleDeleteSpot() {
+    if (!confirm('このスポットを削除しますか？（コメント・猫データも削除されます）')) return
+    setDeleting('spot')
+    const res = await fetch('/api/admin/delete-spot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spotId: spot.id }),
+    })
+    if (res.ok) {
+      onSpotDeleted?.()
+      window.location.reload()
+    } else {
+      alert('削除に失敗しました')
+    }
+    setDeleting(null)
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    if (!confirm('このコメントを削除しますか？')) return
+    setDeleting(commentId)
+    const res = await fetch('/api/admin/delete-comment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commentId }),
+    })
+    if (res.ok) {
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+    } else {
+      alert('削除に失敗しました')
+    }
+    setDeleting(null)
+  }
+
   const bg = isPremium ? 'bg-gray-900' : 'bg-white'
   const textPrimary = isPremium ? 'text-white' : 'text-gray-900'
   const textSecondary = isPremium ? 'text-gray-400' : 'text-gray-400'
@@ -90,7 +126,16 @@ export default function SpotModal({ spot, onClose, isPremium }: Props) {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className={`text-base font-bold ${textPrimary}`}>スポット</h2>
+          <h2 className={`text-base font-bold flex-1 ${textPrimary}`}>スポット</h2>
+          {isAdmin && (
+            <button
+              onClick={handleDeleteSpot}
+              disabled={deleting === 'spot'}
+              className="text-xs text-red-500 hover:text-red-400 px-2 py-1 rounded"
+            >
+              {deleting === 'spot' ? '削除中...' : 'スポット削除'}
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -215,6 +260,15 @@ export default function SpotModal({ spot, onClose, isPremium }: Props) {
                           className="max-h-48 object-cover"
                         />
                       </div>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        disabled={deleting === comment.id}
+                        className="text-xs text-red-500 hover:text-red-400 mt-1 block"
+                      >
+                        {deleting === comment.id ? '削除中...' : '削除'}
+                      </button>
                     )}
                   </div>
                 </div>

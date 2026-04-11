@@ -134,7 +134,6 @@ export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props
         <input
           type="file"
           accept="image/*"
-          capture="environment"
           ref={fileInputRef}
           onChange={handlePhotoChange}
           className="hidden"

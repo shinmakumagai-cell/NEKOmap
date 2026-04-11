@@ -126,7 +126,6 @@ export default function NewSpotPage() {
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               ref={fileInputRef}
               onChange={handlePhotoChange}
               className="hidden"
