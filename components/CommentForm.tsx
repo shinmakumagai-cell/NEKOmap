@@ -76,22 +76,43 @@ export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props
         .from('spot-photos')
         .upload(fileName, photo)
 
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from('spot-photos')
-          .getPublicUrl(fileName)
-        photoUrl = urlData.publicUrl
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError)
+        setError(`写真のアップロードに失敗しました: ${uploadError.message}`)
+        setSubmitting(false)
+        return
       }
+
+      const { data: urlData } = supabase.storage
+        .from('spot-photos')
+        .getPublicUrl(fileName)
+      photoUrl = urlData.publicUrl
     }
 
-    const { error: insertError } = await supabase
+    // photo_urlカラムが存在しない場合のfallback
+    let insertError
+    const { error: err1 } = await supabase
       .from('comments')
       .insert({
         spot_id: spotId,
         user_id: user.id,
-        body: data.body,
+        body: data.body || '📷',
         photo_url: photoUrl,
       })
+
+    if (err1) {
+      // photo_urlカラムがない場合はphoto_urlなしで再試行
+      const { error: err2 } = await supabase
+        .from('comments')
+        .insert({
+          spot_id: spotId,
+          user_id: user.id,
+          body: data.body || (photoUrl ? `📷 ${photoUrl}` : ''),
+        })
+      insertError = err2
+    } else {
+      insertError = null
+    }
 
     if (insertError) {
       setError('コメントの投稿に失敗しました')
@@ -149,7 +170,7 @@ export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props
         </button>
 
         <input
-          {...register('body', { required: true, maxLength: 200 })}
+          {...register('body', { maxLength: 200 })}
           placeholder="返信をポスト"
           className={`flex-1 text-[15px] bg-transparent py-2 focus:outline-none ${
             isPremium ? 'placeholder-gray-600 text-white' : 'placeholder-gray-400'

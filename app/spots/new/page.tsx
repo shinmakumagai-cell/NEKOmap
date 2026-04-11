@@ -81,12 +81,17 @@ export default function NewSpotPage() {
         .from('spot-photos')
         .upload(fileName, photo)
 
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from('spot-photos')
-          .getPublicUrl(fileName)
-        photoUrl = urlData.publicUrl
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError)
+        setError(`写真のアップロードに失敗しました: ${uploadError.message}`)
+        setSubmitting(false)
+        return
       }
+
+      const { data: urlData } = supabase.storage
+        .from('spot-photos')
+        .getPublicUrl(fileName)
+      photoUrl = urlData.publicUrl
     }
 
     const { error: insertError } = await supabase
