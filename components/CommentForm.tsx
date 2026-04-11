@@ -8,6 +8,7 @@ import { updateUserScore } from '@/lib/scoring'
 type Props = {
   spotId: string
   onCommentAdded: () => void
+  isPremium?: boolean
 }
 
 type FormData = {
@@ -17,7 +18,7 @@ type FormData = {
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 
-export default function CommentForm({ spotId, onCommentAdded }: Props) {
+export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [photo, setPhoto] = useState<File | null>(null)
@@ -122,7 +123,9 @@ export default function CommentForm({ spotId, onCommentAdded }: Props) {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex items-center gap-2">
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+            isPremium ? 'bg-gray-800' : 'bg-gray-100'
+          }`}>
             😺
           </div>
         </div>
@@ -139,7 +142,9 @@ export default function CommentForm({ spotId, onCommentAdded }: Props) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 text-gray-400"
+          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full ${
+            isPremium ? 'hover:bg-gray-800 text-gray-500' : 'hover:bg-gray-100 active:bg-gray-200 text-gray-400'
+          }`}
         >
           📷
         </button>
@@ -147,13 +152,19 @@ export default function CommentForm({ spotId, onCommentAdded }: Props) {
         <input
           {...register('body', { required: true, maxLength: 200 })}
           placeholder="返信をポスト"
-          className="flex-1 text-[15px] bg-transparent py-2 focus:outline-none placeholder-gray-400"
+          className={`flex-1 text-[15px] bg-transparent py-2 focus:outline-none ${
+            isPremium ? 'placeholder-gray-600 text-white' : 'placeholder-gray-400'
+          }`}
           disabled={submitting}
         />
         <button
           type="submit"
           disabled={submitting || (!body?.trim() && !photo)}
-          className="text-sm bg-gray-800 text-white px-4 py-1.5 rounded-full font-bold hover:bg-gray-700 disabled:opacity-40 active:bg-gray-900"
+          className={`text-sm px-4 py-1.5 rounded-full font-bold disabled:opacity-40 ${
+            isPremium
+              ? 'bg-amber-600 text-white hover:bg-amber-500'
+              : 'bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-900'
+          }`}
         >
           {submitting ? '...' : '返信'}
         </button>

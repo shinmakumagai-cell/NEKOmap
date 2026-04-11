@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 
 type Props = {
   currentUsername: string
+  isPremium?: boolean
 }
 
-export default function UsernameEdit({ currentUsername }: Props) {
+export default function UsernameEdit({ currentUsername, isPremium }: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
   const [username, setUsername] = useState(currentUsername)
@@ -59,14 +60,14 @@ export default function UsernameEdit({ currentUsername }: Props) {
   if (!editing) {
     return (
       <div>
-        <p className="text-sm text-gray-500 mb-1">ユーザー名</p>
+        <p className={`text-sm mb-1 ${isPremium ? 'text-gray-400' : 'text-gray-500'}`}>ユーザー名</p>
         <div className="flex items-center justify-between">
-          <p className="text-gray-800 font-medium">{currentUsername}</p>
+          <p className={`font-medium ${isPremium ? 'text-white' : 'text-gray-800'}`}>{currentUsername}</p>
           <div className="flex items-center gap-2">
-            {success && <span className="text-xs text-green-500">保存しました</span>}
+            {success && <span className={`text-xs ${isPremium ? 'text-amber-400' : 'text-green-500'}`}>保存しました</span>}
             <button
               onClick={() => setEditing(true)}
-              className="text-sm text-gray-400 hover:text-gray-600 active:text-gray-800"
+              className={`text-sm ${isPremium ? 'text-amber-400 hover:text-amber-300' : 'text-gray-400 hover:text-gray-600'}`}
             >
               変更
             </button>
@@ -78,26 +79,34 @@ export default function UsernameEdit({ currentUsername }: Props) {
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-2">ユーザー名</p>
+      <p className={`text-sm mb-2 ${isPremium ? 'text-gray-400' : 'text-gray-500'}`}>ユーザー名</p>
       <div className="flex gap-2">
         <input
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           maxLength={20}
-          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:border-gray-400"
+          className={`flex-1 border rounded-xl px-3 py-2 text-base focus:outline-none ${
+            isPremium
+              ? 'bg-gray-700 border-gray-600 text-white focus:border-amber-500'
+              : 'border-gray-200 focus:border-gray-400'
+          }`}
           autoFocus
         />
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gray-800 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 disabled:opacity-50 active:bg-gray-900"
+          className={`px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50 ${
+            isPremium
+              ? 'bg-amber-600 text-white hover:bg-amber-500'
+              : 'bg-gray-800 text-white hover:bg-gray-700'
+          }`}
         >
           {saving ? '...' : '保存'}
         </button>
         <button
           onClick={() => { setEditing(false); setUsername(currentUsername); setError(null) }}
-          className="text-sm text-gray-400 px-2"
+          className={`text-sm px-2 ${isPremium ? 'text-gray-500' : 'text-gray-400'}`}
         >
           取消
         </button>

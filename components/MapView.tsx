@@ -143,9 +143,10 @@ function AutoLocate({ onLocated }: { onLocated: (pos: [number, number]) => void 
 
 type Props = {
   spots: Spot[]
+  isPremium?: boolean
 }
 
-export default function MapView({ spots }: Props) {
+export default function MapView({ spots, isPremium }: Props) {
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null)
   const [locationStatus, setLocationStatus] = useState<'loading' | 'granted' | 'denied'>('loading')
   const [currentPos, setCurrentPos] = useState<[number, number] | null>(null)
@@ -278,6 +279,7 @@ export default function MapView({ spots }: Props) {
         <SpotModal
           spot={selectedSpot}
           onClose={() => setSelectedSpot(null)}
+          isPremium={isPremium}
         />
       )}
     </>

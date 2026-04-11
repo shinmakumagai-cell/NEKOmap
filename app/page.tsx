@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   return (
     <div className="h-full">
-      <MapView spots={(spots as Spot[]) ?? []} />
+      <MapView spots={(spots as Spot[]) ?? []} isPremium={isPremium} />
       <AdBanner isPremium={isPremium} />
     </div>
   )

@@ -21,16 +21,28 @@ export default async function SettingsPage() {
   const username = profile?.username ?? user.email ?? ''
 
   return (
-    <div className="max-w-sm mx-auto px-4 py-8">
-      <h2 className="text-xl font-bold text-gray-800 mb-6">設定</h2>
+    <div className={`min-h-full px-4 py-8 ${isPremium ? 'bg-gray-900' : ''}`}>
+      <div className="max-w-sm mx-auto">
+        <h2 className={`text-xl font-bold mb-6 ${isPremium ? 'text-white' : 'text-gray-800'}`}>
+          {isPremium ? '⚙️ 設定' : '設定'}
+        </h2>
 
-      <div className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <UsernameEdit currentUsername={username} />
-        </div>
+        <div className="space-y-6">
+          <div className={`rounded-2xl p-4 shadow-sm ${
+            isPremium
+              ? 'bg-gray-800 border border-gray-700'
+              : 'bg-white border border-gray-100'
+          }`}>
+            <UsernameEdit currentUsername={username} isPremium={isPremium} />
+          </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <MarkerSettings isPremium={isPremium} currentMarkerType={markerType} />
+          <div className={`rounded-2xl p-4 shadow-sm ${
+            isPremium
+              ? 'bg-gray-800 border border-gray-700'
+              : 'bg-white border border-gray-100'
+          }`}>
+            <MarkerSettings isPremium={isPremium} currentMarkerType={markerType} />
+          </div>
         </div>
       </div>
     </div>
