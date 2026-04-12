@@ -70,28 +70,21 @@ export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props
     let photoUrl: string | null = null
 
     if (photo) {
-      const ext = photo.name.split('.').pop()
-      const fileName = `comments/${user.id}/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from('spot-photos')
-        .upload(fileName, photo)
+      const formData = new FormData()
+      formData.append('file', photo)
+      formData.append('folder', 'comments')
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      const uploadData = await uploadRes.json()
 
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError)
-        setError(`写真のアップロードに失敗しました: ${uploadError.message}`)
+      if (!uploadRes.ok) {
+        setError(`写真のアップロードに失敗しました: ${uploadData.error}`)
         setSubmitting(false)
         return
       }
-
-      const { data: urlData } = supabase.storage
-        .from('spot-photos')
-        .getPublicUrl(fileName)
-      photoUrl = urlData.publicUrl
+      photoUrl = uploadData.url
     }
 
-    // photo_urlカラムが存在しない場合のfallback
-    let insertError
-    const { error: err1 } = await supabase
+    const { error: insertError } = await supabase
       .from('comments')
       .insert({
         spot_id: spotId,
@@ -99,20 +92,6 @@ export default function CommentForm({ spotId, onCommentAdded, isPremium }: Props
         body: data.body || '📷',
         photo_url: photoUrl,
       })
-
-    if (err1) {
-      // photo_urlカラムがない場合はphoto_urlなしで再試行
-      const { error: err2 } = await supabase
-        .from('comments')
-        .insert({
-          spot_id: spotId,
-          user_id: user.id,
-          body: data.body || (photoUrl ? `📷 ${photoUrl}` : ''),
-        })
-      insertError = err2
-    } else {
-      insertError = null
-    }
 
     if (insertError) {
       setError('コメントの投稿に失敗しました')

@@ -73,25 +73,20 @@ export default function NewSpotPage() {
 
     let photoUrl: string | null = null
 
-    // 写真をSupabase Storageにアップロード
+    // 写真をサーバー経由でアップロード
     if (photo) {
-      const ext = photo.name.split('.').pop()
-      const fileName = `${user.id}/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from('spot-photos')
-        .upload(fileName, photo)
+      const formData = new FormData()
+      formData.append('file', photo)
+      formData.append('folder', 'spots')
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      const uploadData = await uploadRes.json()
 
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError)
-        setError(`写真のアップロードに失敗しました: ${uploadError.message}`)
+      if (!uploadRes.ok) {
+        setError(`写真のアップロードに失敗しました: ${uploadData.error}`)
         setSubmitting(false)
         return
       }
-
-      const { data: urlData } = supabase.storage
-        .from('spot-photos')
-        .getPublicUrl(fileName)
-      photoUrl = urlData.publicUrl
+      photoUrl = uploadData.url
     }
 
     const { error: insertError } = await supabase
